@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>A Comprehensive Overview of Concepts and Algorithms<br/>Used by Modern Chess Engines</title>
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
@@ -22,21 +22,26 @@
             <br /><br /><br />
             #### Johannes Weinsheimer
             <br /><br /><br />
-            v2            
+
+            <aside data-markdown class="notes">
+              - Auf Deutsch um in der Kürze der Zeit hoffentlich alles etwas genauer zu erklären
+            </aside> 
           </textarea>
         </section>
 				<section data-markdown>
           <textarea data-template>
-            #### Thema
-            - Schach-Engine <b>!=</b> Schachprogramm
-            - Ausarbeitung: Querschnitt durch die wichtigsten Komponenten
-            - Präsentation: Fokus auf die Kernkompetenz
+            #### A Comprehensive Overview of Concepts and Algorithms<br/>Used by Modern Chess Engines
+            - (Modern) Chess Engine?
+              - Kein <em>Schachprogramm</em>, sondern dessen <em>Motor</em>
+
+            - Artikel: Querschnitt (die wichtigsten Komponenten)
+              - Schwerpunkt: Konzepte & Algorithmen, nicht die konkrete Implementierung
 
             <aside data-markdown class="notes">
-              - Schach-Engine: Backend  / Motor, Schachprogramm: UI bzw. Frontend
-              - Austausch via Standardprotokoll UCI
-              - Was die ist die Kernkompetenz? siehe nächste Folie!
-              - Vielleicht noch kurz: schwer abzuschätzen ob die Zeit für alles reicht, die letzten 1-2 Aspekte sind optional
+              - Beispiel: App fürs Handy
+              - Schach-Engine sagt die Züge vor
+              - Schach-Engine = Backend, Schachprogramm = Frontend
+                - Austausch via Standardprotokoll UCI
             </aside> 
           </textarea>                 
         </section>                      
@@ -44,94 +49,117 @@
           <textarea data-template>
             #### Beispiel für den Einsatz einer Schach-Engine (lichess.org)
             <img src="newscreens/chess_engine.png" />
-          </textarea>
 
-          <aside data-markdown class="notes">
-            - lichess.org: kostenlos, keine Werbung, kein Tracking, tolle Performance, Open-Source
-            - Analysbrett: Partie durchspielen
-            - Links: Input einer Schach-Engine (in dem Fall im Browser laufend)
-            - Rechts (oben): Output einer Schach-Engine (vereinfacht)
-              - Bewertung (Evaluation) der Position
-              - Folge von Zügen in der im Schach üblichen Notation
-            - Ziel des Vortrags: etwas beleuchten wie die Schach-Engine auf ihren Output kommt
-          </aside>             
+            <aside data-markdown class="notes">
+              - Analysebrett auf lichess.org: Stellung aufbauen und den Computer befragen
+              - Schachprogramm ist eine Webanwendung
+              - Schach-Engine läuft im Hintergrund, im Browser
+              - Thema der Präsentation: Wie kann der Computer da eine sehr sehr qualizierte Aussagen drüber Treffen?
+              - Zeit reicht leider nur um die absolute Grundlage davon zu umreissen
+            </aside>     
+         </textarea>                  
         </section> 
         <section data-markdown>
           <textarea data-template>
-            #### Spielbaum: Schach
-            <img width="900" src="screens/game_tree.png" />
-            &nbsp;
+            #### Spielbaum
+            - Knoten: Positionen
 
-            via: https://chrisbutner.github.io/ChessCoach/
-
+              - Wurzel: Ausgangsposition         
+            - Kanten: Züge
+            - <u>Tiefe</u> (d): Anzahl der Ebenen (3)
+            - <u>Durchschnittlicher Verzweigungsfaktor</u> (b):<br />durchschnittliche Anzahl von Kindern (3)
+            
+            <img style="float: right;" width="900" src="screens/game_tree.png" />
+            <br/>
             <aside data-markdown class="notes">
-              - Möglich auf Grund der spieletheoretischen Eigenschaften
-              - Nullsummenspiel
-                - eine Seite gewinnt, andere Seite verliert oder Unentschieden: kein Win-Win
-                - es wird gegeneinander gespielt
-              - Perfekte Informationen: Beide Seite haben alle Informationen, startend mit dem Start des Spiels
-                - kein Kartenspiel mit verdeckten Karten
-              - Erlaubt es Schach in einen Spielbaum wie hier angedeutet darzustellen
-            </aside>               
-          </textarea> 
-        </section>
-        <section data-markdown>
-          <textarea data-template>
-            #### Spielbaum: Begriffe
-            - Knoten (nodes): Positionen
-
-            - Wurzel (root node): Ausgangsposition
-            - Zweige (branches): Züge
-            - Kinder (child nodes): Knoten unterhalb eines anderen Knoten&nbsp;&nbsp;&nbsp;
-            - Blätter (leaf nodes): Knoten ohne Kinder (hier: 9)
-            - Tiefe (depth): Anzahl der Ebenen (3)
-            - Durchschnittlicher Verzweigungsfaktor (average branching<br />factor): durschnittliche Anzahl von Kindern (3)
-          
-            <img width="600" src="screens/game_tree.png" />
+              - Erster Schritt: Realisieren dass man Schach als Spielbaum darstellen kann
+                - möglich auf Grund der spieletheoretischen Eigenschaften
+              - Grafik: Beispiel für einen (offensichtlich unvollständigen) Spielbaum              
+              - Als Nächstes: Nachdem wir eine Idee haben was ein Spielbaum ist können wir mal folgendes Szenario andenken
+            </aside>                     
           </textarea>                       
         </section>         
         <section data-markdown>
           <textarea data-template>
             #### Spielbaum
             - Theorie: Vollständiger Spielbaum
+
               - Wurzel: Startposition
+              - Struktur: immer alle möglichen Züge berücksichtigen
+
               - Blätter: Positionen mit denen die Partie endet (z.b. Schachmatt)
+              - Spielbaum bildet alle möglichen Spielverläufe ab
               - Vorgehen
                 - Aktuelle Position suchen
-                - <em>Irgendwie</em> den weiteren Spielverlauf vorhersagen
-                - Ergebnis der finalen Position entnehmen
-
-            - Praxis: Partielle Spielbäume
-              - Grund? Exponentielles Wachstum!
-              - Anzahl möglicher Positionen nach zwei Zügen: `$ {20^{2}} = 400$`
-              - Analyse: Tiefe d = 70, durschnittlicher Verzweigungsfaktor b = 30: `$ {30^{70}} = ...$`
-              - Lösung: Begrenzung der Tiefe
-            
-            <aside data-markdown class="notes">
-              - "Ist Schach lösbar?"
-                - Stand heute: Niemals!
-                - Endspieldatenbanken als "Teillösungen"
-                - Plugin für chess engines das genutzt werden kann wenn nur noch eine bestimmte Mengen bestimmter Figuren auf dem Brett ist
-                  - Kombinationen aus 2x König und 5x anderen Figuren -> 14 TB
-                  - Auf dem Schachbrett leider 32 Figuren
-            </aside>               
-          </textarea>                                
+                - <em>Irgendwie</em> den zu erwartenden Spielverlauf vohersagen
+                - Resultat: Zug & Ergebnis
+          </textarea>                       
         </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+              #### Spielbaum          
+              - Praxis: Partielle Spielbäume
+                - Grund? Exponentielles Wachstum!
+
+                - Anzahl möglicher Positionen nach zwei Zügen: `$ {b^{d}} = {20^{2}} = 400$`
+                - Analyse: Tiefe d = 70, durschnittlicher Verzweigungsfaktor b = 30 ergibt ~ `$ {30^{70}} = ...$` Blätter
+                - Schlussfolgerung: Tiefe ist limitiert (5-6)
+              
+              <aside data-markdown class="notes">
+                - "Ist Schach lösbar?"
+                  - Fehlt an Kapazitäten
+                  - Schwer vorstellbar dass sich das jemals ändert
+                  - Endspieldatenbanken als "Teillösungen"
+                  - Plugin für chess engines das genutzt werden kann wenn nur noch eine bestimmte Mengen bestimmter Figuren auf dem Brett ist
+                    - Kombinationen aus 2x König und 5x anderen Figuren -> 14 TB
+                    - Auf dem Schachbrett leider 32 Figuren
+              </aside>               
+            </textarea>                                
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+              #### Blätter
+              | d  | b = 30 |
+              |---|---|
+              | 0 | 1 |
+              | 1 | 30 |
+              | 2 | 900 |
+              | 3 | 27.000 |
+              | 4 | 810.000 |
+              | 5 | 24.300.000 |
+              | 6 | <del>729.000.000</del> |
+              | 10 | <del>590.490.000.000.000</del> | 
+              <aside data-markdown class="notes">
+                - Stockfish 14 auf dem PC: 7.5 Millionen Knoten/s
+                - Suchtiefe von 5 bis 6 bringt uns nicht weit
+              </aside>               
+            </textarea>                       
+        </section>
+        </section>        
         <section> <!-- & Bewertung -->
           <section data-markdown>
             <textarea data-template>
-              #### Suche     
-              - Spielbaum -> Suchbaum
-              - Knoten repräsentieren Werte, nicht mehr Positionen
-                - Blätter: oft keine finale Position (Grund: Suchbaum <em>mittendrin</em>)
-              - Werte geben an wie die Position zu bewerten ist
-    
-              &nbsp;
-    
-              Beispiel: Suchbaum mit Tiefe d = 2 und durschnittlichem Verzweigungsfaktor b = 2
-    
-              <br />
+              #### Suche: Suchbaum
+              - Erster Schritt für die Vorhersage: Spielbaum -> Suchbaum
+              - Wurzel: aktuelle Position
+              - Knoten: nicht mehr Positionen im Vordergrund, sondern Zahlwerte
+              - Blätter
+                - Grundlage für die Vorhersage
+                - Bei komplettem Suchbaum: 1 (Sieg: Weiß), 0 (Unentschieden), -1 (Sieg: Schwarz)
+                - Aber: meist keine finale Position (Suchbaum ist <em>mittendrin</em>)
+        
+              <br /><br />
               <img width="500" src="screens/minimax_0.png" />
+
+              <aside data-markdown class="notes">
+                - Das "irgendwie den Spielverlauf vorhesagen" noch nicht beantwortet, aber wir gehen immernoch davon aus dass es möglich ist
+                - Das hier ist der nächste Schritt
+                - Beispiel für "meinst keine Finale position": lichess.org screenshot
+                - Extrem vereinfachtes Beispiel!!!!!: wir erinnern uns: durchschnittliche Verzweigugnsfaktor 30, nicht 2, suche Tiefer als 2
+                - wenn wir nicht das Ergebnis kennen brauchen wir zumindest eine Orientierung was gut für uns ist
+                - Wenn doch finale Position: extreme Werte                
+              </aside>                   
             </textarea>                       
           </section> 
           <section data-markdown>
@@ -141,14 +169,12 @@
 
               - vorhandenes Material (= Figuren)
               - restliche Eigenschaften
-                - Platzierung der Figuren, Königssicherheit, Mobilität, ...
+                - Platzierung der Figuren, Königssicherheit, ...
             - Berechnung (vereinfacht)
-              - Eigenschaften gewichten & summieren
-              - Evaluation = Differenz der Summen aus Sicht von Weiß und Schwarz                
+              - Für jede Seite: Eigenschaften gewichten & summieren
+              - Evaluation = Differenz der Summen              
                 - Vorzeichen: für welche Seite ist die Position besser?
-                  - positiver Wert: Vorteil für Weiß
                 - Betrag: wie groß ist der Vorteil?
-            - Wichtig: Konkrete Ideen / Probleme bleiben hier <u>unberücksichtigt</u>!
             </textarea>          
           </section>   
           <section data-markdown>
@@ -172,11 +198,12 @@
         <section data-markdown>
           <textarea data-template>
             #### Suche: Minimax-Algorithmus
-            - Minimax liefert optimale Spielstrategie
+            - Minimax liefert optimale Spielstrategie für Spiele wie Schach
+
               - Sichert <u>höchstmöglichen</u> Gewinn zu, <u>unabhängig</u> von der <u>Spielweise</u> des Gegners
             - Beide Spieler wollen das für <u>sich</u> bestmögliche Ergebnis erreichen
-              - Weiß: maximierende Spieler (maximizing player / maximizer)
-              - Schwarz: minimierende Spieler (minimizing player / minimizer)
+              - Weiß: maximierende Spieler
+              - Schwarz: minimierende Spieler
             &nbsp;
             <br />
             <aside data-markdown class="notes">
@@ -200,28 +227,34 @@
 
             - Grundannahme: Schwarz spielt immer den bestmöglichen Zug
 
+            - Wurzel: Garantierte Bewertung (bei Abweichungen vom Schwarz: +/=)
+
             <aside data-markdown class="notes">
-              - Unterschied zwischen Mensch und Computer
-              - Mensch spielt immer den Gegner
-                - Gegen schwächere, gleichstarke oder stärkere Gegner wird potentiell unterschiedlich gespielt
-                - Computer spielt immer so als ob er gegen den stärkst möglichen Gegner spielt
-                - Man kann sich vorstellen dass man durch Modifikationen eine Chess-Engine schreiben kann die objektiv schwächer ist,
-                gegen mich aber effektiver spielen und noch schneller gewinnen könnte
+              - Minimax Grundlage für alles weitere
+              - Ablesen was wir wissen wollten: besten Zug, Bewertung
             </aside>            
           </textarea>                       
         </section>
         <section data-markdown>
           <textarea data-template>
-            #### Suche: Minimax-Algorithmus      
-            <img height="600px" src="screens/evaluation_1.png" />
-            <img height="600px" src="screens/everything_ok.png" />
+            #### Suche: Minimax-Algorithmus + X (d = 30)    
+            <img height="600px" src="newscreens/chess_engine.png" />
+            <img height="600px" src="screens/30_gezogen.png" />
   
             <aside data-markdown class="notes">
               - Der Wert in der Wurzel des Suchbaums: Bewertung der nach oben durchgereichten Position
-              - Der vorgeschlagene Zug schlägt den Weg zu dieser Position ein
+              - Der vorgeschlagene Zug schlägt den Spielverlauf zu dieser Position ein
+              - Best case für Schwarz (jede Abweichung vom Pfad führt zu einer besseren Position für Weiß)
             </aside>                  
           </textarea>                         
         </section> 
+        <section data-markdown>
+          <textarea data-template>
+            <br /><br /><br /><br />
+            &nbsp;
+            ## Vielen Dank für Ihre Aufmerksamkeit!
+          </textarea>                       
+        </section>                
         <section> <!-- Minimax Fazit & Tabelle -->
           <section data-markdown>
             <textarea data-template>
@@ -232,30 +265,15 @@
               - Suchtiefe die Minimax ermöglicht nicht ausreichend
               - Tiefere Suche & konstante Rechenleistung => weniger Knoten
 
+              <br /><br />
+
+              ### Alpha-Beta Suche
+
               <aside data-markdown class="notes">
                 <em>nach Suchtiefe kurz runterscrollen</em>
               </aside>             
             </textarea>    
           </section>         
-          <section data-markdown>
-            <textarea data-template>
-              #### Blätter (b = 30)
-              | d  | Minimax |
-              |---|---|
-              | 0 | 1 |
-              | 1 | 30 |
-              | 2 | 900 |
-              | 3 | 27.000 |
-              | 4 | 810.000 |
-              | 5 | 24.300.000 |
-              | 6 | 729.000.000 |
-              | 10 | 590.490.000.000.000 | 
-              <aside data-markdown class="notes">
-                - Stockfish 14 auf dem PC: 7.5 Millionen Knoten/s
-                - Suchtiefe von 5 bis 6 bringt uns nicht weit
-              </aside>               
-            </textarea>                       
-          </section> 
         </section>   
 
 
@@ -507,6 +525,7 @@
         height: 800,
 
         center: false,
+        slideNumber: true,
 
 				// Learn about plugins: https://revealjs.com/plugins/
 				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ]
