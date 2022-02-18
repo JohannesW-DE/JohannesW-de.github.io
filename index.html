@@ -63,7 +63,6 @@
           <textarea data-template>
             #### Spielbaum
             - Knoten: Positionen
-
               - Wurzel: Ausgangsposition         
             - Kanten: Züge
             - <u>Tiefe</u> (d): Anzahl der Ebenen (3)
@@ -92,6 +91,7 @@
               - Vorgehen
                 - Aktuelle Position suchen
                 - <em>Irgendwie</em> den zu erwartenden Spielverlauf vohersagen
+                  - Grundlage: Blätter
                 - Resultat: Zug & Ergebnis
           </textarea>                       
         </section>
@@ -172,7 +172,7 @@
                 - Platzierung der Figuren, Königssicherheit, ...
             - Berechnung (vereinfacht)
               - Für jede Seite: Eigenschaften gewichten & summieren
-              - Evaluation = Differenz der Summen              
+              - Evaluation = Summe (Weiß) - Summe (Schwarz)              
                 - Vorzeichen: für welche Seite ist die Position besser?
                 - Betrag: wie groß ist der Vorteil?
             </textarea>          
